@@ -68,4 +68,31 @@ describe('SelectedCoursesPanel', () => {
     render(<SelectedCoursesPanel />)
     expect(screen.getByText(/CRN-X/)).toBeInTheDocument()
   })
+
+  it('shows credit hour total badge', () => {
+    act(() => useScheduleStore.getState().addSection(makeSection('A'), fakeCourse, 0))
+    render(<SelectedCoursesPanel />)
+    expect(screen.getByText('3 cr')).toBeInTheDocument()
+  })
+
+  it('counts credit hours once per course even when lecture + lab both added', () => {
+    const s1 = makeSection('A')
+    const s2 = { ...makeSection('B'), id: 'B2' }
+    act(() => {
+      useScheduleStore.getState().addSection(s1, fakeCourse, 0)
+      useScheduleStore.getState().addSection(s2, fakeCourse, 0)
+    })
+    render(<SelectedCoursesPanel />)
+    expect(screen.getByText('3 cr')).toBeInTheDocument()
+  })
+
+  it('sums credits across different courses', () => {
+    const course2: ApiCourse = { ...fakeCourse, id: 'c2', number: '38400', creditHours: 4 }
+    act(() => {
+      useScheduleStore.getState().addSection(makeSection('A'), fakeCourse, 0)
+      useScheduleStore.getState().addSection(makeSection('B'), course2, 1)
+    })
+    render(<SelectedCoursesPanel />)
+    expect(screen.getByText('7 cr')).toBeInTheDocument()
+  })
 })

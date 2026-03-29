@@ -9,6 +9,7 @@ export interface SelectedSection extends ApiSection {
   courseLabel: string // e.g. "CS 18200"
   courseTitle: string
   colorIndex: number
+  creditHours: number
 }
 
 interface ScheduleStore {
@@ -40,6 +41,7 @@ export const useScheduleStore = create<ScheduleStore>()(
               courseLabel: `${course.subject} ${course.number}`,
               courseTitle: course.title,
               colorIndex,
+              creditHours: course.creditHours,
             },
           ],
         }))

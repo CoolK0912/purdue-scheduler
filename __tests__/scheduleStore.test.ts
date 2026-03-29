@@ -66,6 +66,7 @@ describe('addSection', () => {
     expect(selectedSections[0].courseTitle).toBe('Foundations of CS')
     expect(selectedSections[0].colorIndex).toBe(2)
     expect(selectedSections[0].courseId).toBe('course-1')
+    expect(selectedSections[0].creditHours).toBe(3)
   })
 
   it('does not add a duplicate section', () => {
