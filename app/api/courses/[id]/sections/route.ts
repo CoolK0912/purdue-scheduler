@@ -4,11 +4,11 @@ import { getSections } from '@/lib/purdue'
 // GET /api/courses/[id]/sections?semester=<semesterId>
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { searchParams } = req.nextUrl
   const semester = searchParams.get('semester')?.trim()
-  const courseId = params.id
+  const { id: courseId } = await params
 
   if (!semester) {
     return NextResponse.json({ error: 'Missing query parameter: semester' }, { status: 400 })

@@ -1,65 +1,76 @@
 // Purdue.io OData API — shared TypeScript interfaces
-// Data model: Semester → Subject → Course → Class → Section → Meeting
+// Real schema: https://api.purdue.io/odata/$metadata
+//
+// Data model: Term → Class (CourseId + TermId) → Section → Meeting
+//             Course → Classes → Sections
 
-export interface Semester {
-  SemesterId: string
-  Code: string       // e.g. "202510" for Spring 2025, "202580" for Fall 2025
+// ---- Raw API types (as returned by Purdue.io) ----
+
+export interface RawTerm {
+  Id: string
+  Code: string       // e.g. "202710" for Fall 2026
   Name: string       // e.g. "Fall 2026"
+  StartDate: string | null
+  EndDate: string | null
 }
 
-export interface Subject {
-  SubjectId: string
+export interface RawSubject {
+  Id: string
   Abbreviation: string  // e.g. "CS"
   Name: string          // e.g. "Computer Science"
 }
 
-export interface Course {
-  CourseId: string
+export interface RawCourse {
+  Id: string
   Number: string        // e.g. "18200"
-  Title: string         // e.g. "Foundations of Computer Science"
-  Description: string
+  Title: string
+  Description: string | null
   CreditHours: number
-  Subject: Subject
+  SubjectId: string
+  Subject?: RawSubject
+  Classes?: RawClass[]
 }
 
-export interface Instructor {
-  InstructorId: string
+export interface RawClass {
+  Id: string
+  CourseId: string
+  TermId: string
+  CampusId: string
+  Sections?: RawSection[]
+}
+
+export interface RawSection {
+  Id: string
+  Crn: string
+  ClassId: string
+  Type: string | null
+  StartDate: string | null
+  EndDate: string | null
+  Meetings?: RawMeeting[]
+}
+
+export interface RawInstructor {
+  Id: string
   Name: string
   Email: string | null
 }
 
-export interface Meeting {
-  MeetingId: string
-  Type: string           // e.g. "Lecture", "Lab", "Recitation"
-  StartTime: string | null  // ISO time string, e.g. "10:30:00"
-  EndTime: string | null    // ISO time string, e.g. "11:20:00"
-  Monday: boolean
-  Tuesday: boolean
-  Wednesday: boolean
-  Thursday: boolean
-  Friday: boolean
-  Saturday: boolean
-  Sunday: boolean
-  RoomId: string | null
-}
-
-export interface Section {
+export interface RawMeeting {
+  Id: string
   SectionId: string
-  Crn: string
-  Type: string           // e.g. "Lecture", "Lab"
-  RegistrationStatus: string
-  EnrollmentCount: number
-  EnrollmentMax: number
-  WaitlistCount: number
-  Meetings: Meeting[]
-  Instructors: Instructor[]
+  Type: string | null
+  StartDate: string | null
+  EndDate: string | null
+  // DaysOfWeek: flags enum — can come back as number or "Monday, Wednesday" string
+  DaysOfWeek: number | string | null
+  StartTime: string | null    // "HH:MM:SS"
+  Duration: string | null     // ISO 8601 duration e.g. "PT50M", "PT1H20M"
+  RoomId: string | null
+  Instructors?: RawInstructor[]
 }
 
-export interface CourseWithSections extends Course {
-  Sections: Section[]
-}
+// ---- Normalized API shapes (returned by our /app/api/ routes) ----
 
-// Normalized shape returned by our API routes (frontend-friendly)
 export interface ApiSemester {
   id: string
   code: string
@@ -79,22 +90,20 @@ export interface ApiCourse {
 export interface ApiMeeting {
   id: string
   type: string
-  startTime: string | null
-  endTime: string | null
+  startTime: string | null    // "HH:MM:SS"
+  endTime: string | null      // computed from startTime + duration
   days: ('M' | 'T' | 'W' | 'R' | 'F' | 'Sa' | 'Su')[]
-  room: string | null
+  room: string | null         // RoomId (GUID) — frontend can ignore or display
+  instructors: string[]       // instructor names (from Meeting, not Section)
 }
 
 export interface ApiSection {
   id: string
   crn: string
   type: string
-  enrolled: number
-  enrollMax: number
-  waitlist: number
-  open: boolean
-  instructors: string[]
+  instructors: string[]   // aggregated from meetings (may repeat across meetings)
   meetings: ApiMeeting[]
+  // Note: Purdue.io does not expose enrollment counts — omitted intentionally
 }
 
 export interface ApiCourseWithSections extends ApiCourse {
