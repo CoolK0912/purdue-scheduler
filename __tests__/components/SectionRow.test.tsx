@@ -21,19 +21,18 @@ beforeEach(() => {
 })
 
 describe('SectionRow', () => {
-  it('renders CRN, type, and instructor', () => {
+  it('renders CRN, type abbreviation, and instructor', () => {
     const s = makeSection('A', ['M', 'W', 'F'], '10:30:00', '11:20:00')
     render(<SectionRow section={s} course={fakeCourse} colorIndex={0} />)
     expect(screen.getByText(/CRN CRN-A/)).toBeInTheDocument()
-    expect(screen.getByText(/Lecture/)).toBeInTheDocument()
+    expect(screen.getByText('LEC')).toBeInTheDocument()
     expect(screen.getByText(/Dr\. Smith/)).toBeInTheDocument()
   })
 
-  it('formats time correctly (10:30 AM – 11:20 AM)', () => {
+  it('formats time as a range (10:30–11:20 AM)', () => {
     const s = makeSection('A', ['M'], '10:30:00', '11:20:00')
     render(<SectionRow section={s} course={fakeCourse} colorIndex={0} />)
-    expect(screen.getByText(/10:30 AM/)).toBeInTheDocument()
-    expect(screen.getByText(/11:20 AM/)).toBeInTheDocument()
+    expect(screen.getByText(/10:30.+11:20 AM/)).toBeInTheDocument()
   })
 
   it('shows "Add" button when section is not selected', () => {

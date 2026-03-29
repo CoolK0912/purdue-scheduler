@@ -101,8 +101,10 @@ describe('searchCourses', () => {
   it('uppercases the query', async () => {
     mockFetch.mockReturnValue(odataResponse([]))
     await searchCourses('cs182', termId)
-    const url: string = mockFetch.mock.calls[0][0]
-    expect(url).toContain('CS182')
+    const url = decodeURIComponent(mockFetch.mock.calls[0][0] as string)
+    // "cs182" → subject=CS, number=182 (split and uppercased)
+    expect(url).toContain("'CS'")
+    expect(url).toContain("'182'")
   })
 
   it('includes the termId in the filter', async () => {
@@ -110,6 +112,22 @@ describe('searchCourses', () => {
     await searchCourses('CS', termId)
     const url: string = mockFetch.mock.calls[0][0]
     expect(url).toContain(termId)
+  })
+
+  it('splits "CS 25000" into subject eq + number contains filter', async () => {
+    mockFetch.mockReturnValue(odataResponse([]))
+    await searchCourses('CS 25000', termId)
+    const url = decodeURIComponent(mockFetch.mock.calls[0][0] as string)
+    expect(url).toContain("Subject/Abbreviation eq 'CS'")
+    expect(url).toContain("contains(Number, '25000')")
+  })
+
+  it('splits "MA182" (no space) into subject + number filter', async () => {
+    mockFetch.mockReturnValue(odataResponse([]))
+    await searchCourses('MA182', termId)
+    const url = decodeURIComponent(mockFetch.mock.calls[0][0] as string)
+    expect(url).toContain("Subject/Abbreviation eq 'MA'")
+    expect(url).toContain("contains(Number, '182')")
   })
 
   it('throws on non-ok response', async () => {
