@@ -29,15 +29,8 @@ export default function SectionRow({ section, course, colorIndex }: Props) {
   const conflicts = conflictingIds([...selectedSections, section])
   const wouldConflict = !selected && conflicts.has(section.id)
 
-  const seatsLeft = section.enrollMax - section.enrolled
-  const seatColor =
-    seatsLeft <= 0
-      ? 'text-red-600'
-      : seatsLeft <= 5
-      ? 'text-amber-600'
-      : 'text-emerald-600'
-
   const primaryMeeting = section.meetings[0]
+  const instructor = section.instructors[0] ?? primaryMeeting?.instructors?.[0] ?? 'Staff'
 
   return (
     <div
@@ -73,14 +66,7 @@ export default function SectionRow({ section, course, colorIndex }: Props) {
       </span>
 
       {/* Instructor */}
-      <span className="hidden shrink-0 text-zinc-500 sm:block">
-        {section.instructors[0] ?? 'Staff'}
-      </span>
-
-      {/* Seats */}
-      <span className={`shrink-0 font-medium ${seatColor}`}>
-        {seatsLeft <= 0 ? 'Full' : `${seatsLeft} left`}
-      </span>
+      <span className="hidden shrink-0 text-zinc-500 sm:block">{instructor}</span>
 
       {/* Conflict indicator */}
       {wouldConflict && (

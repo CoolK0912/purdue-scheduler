@@ -6,8 +6,6 @@ import { COURSE_COLORS } from '@/lib/courseColors'
 export default function SelectedCoursesPanel() {
   const { selectedSections, removeSection, clearSchedule } = useScheduleStore()
 
-  const totalCredits = selectedSections.reduce((sum, s) => sum, 0)
-
   if (selectedSections.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-4 py-6 text-center text-sm text-zinc-400 dark:border-zinc-700 dark:bg-zinc-900">

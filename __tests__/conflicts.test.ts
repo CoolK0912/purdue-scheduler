@@ -9,7 +9,7 @@ function meeting(
   startTime: string | null,
   endTime: string | null
 ): ApiMeeting {
-  return { id: Math.random().toString(), type: 'Lecture', startTime, endTime, days, room: null }
+  return { id: Math.random().toString(), type: 'Lecture', startTime, endTime, days, room: null, instructors: [] }
 }
 
 function section(id: string, meetings: ApiMeeting[]): ApiSection {
