@@ -56,6 +56,10 @@ export const useScheduleStore = create<ScheduleStore>()(
 
       isSelected: (sectionId) => get().selectedSections.some((s) => s.id === sectionId),
     }),
-    { name: 'purdue-schedule' }
+    {
+      name: 'purdue-schedule',
+      version: 2,
+      migrate: () => ({ semesterId: '', selectedSections: [] }),
+    }
   )
 )

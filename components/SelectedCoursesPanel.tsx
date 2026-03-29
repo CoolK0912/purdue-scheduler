@@ -15,20 +15,18 @@ export default function SelectedCoursesPanel() {
   }
 
   // Sum credit hours once per unique course (lecture + lab of same course count once)
-  const totalCredits = Array.from(
-    new Map(selectedSections.map((s) => [s.courseId, s.creditHours])).values()
-  ).reduce((sum, cr) => sum + cr, 0)
+  const creditMap = new Map(selectedSections.map((s) => [s.courseId, s.creditHours ?? 0]))
+  const totalCredits = Array.from(creditMap.values()).reduce((sum, cr) => sum + cr, 0)
+  const allUnknown = Array.from(creditMap.values()).every((cr) => cr === 0)
 
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           Selected Sections ({selectedSections.length})
-          {totalCredits > 0 && (
-            <span className="ml-2 rounded-full bg-[#CEB100] px-2 py-0.5 text-[11px] font-bold text-black">
-              {totalCredits} cr
-            </span>
-          )}
+          <span className="ml-2 rounded-full bg-[#CEB100] px-2 py-0.5 text-[11px] font-bold text-black">
+            {allUnknown ? '? cr' : `${totalCredits} cr`}
+          </span>
         </h3>
         <button
           onClick={clearSchedule}
