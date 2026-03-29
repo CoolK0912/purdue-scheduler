@@ -60,12 +60,14 @@ export async function getSemesters(): Promise<ApiSemester[]> {
 export async function searchCourses(query: string, termId: string): Promise<ApiCourse[]> {
   const q = query.trim().toUpperCase()
 
-  // Filter courses that have at least one Class in the given Term,
-  // AND match the query against subject abbreviation, title, or number
-  const filter = [
-    `Classes/any(c: c/TermId eq ${termId})`,
-    `(contains(Subject/Abbreviation, '${q}') or contains(Title, '${q}') or contains(Number, '${q}'))`,
-  ].join(' and ')
+  // Detect "SUBJECT NUMBER" pattern e.g. "CS 25000" or "MA182"
+  const subjectNumber = q.match(/^([A-Z]+)\s*(\d+.*)$/)
+  const termFilter = `Classes/any(c: c/TermId eq ${termId})`
+  const queryFilter = subjectNumber
+    ? `(Subject/Abbreviation eq '${subjectNumber[1]}' and contains(Number, '${subjectNumber[2]}'))`
+    : `(contains(Subject/Abbreviation, '${q}') or contains(Title, '${q}') or contains(Number, '${q}'))`
+
+  const filter = `${termFilter} and ${queryFilter}`
 
   const raw = await odata<any>('Courses', {
     $filter: filter,
